@@ -16,7 +16,10 @@ internal class FakeIO : IGameIO
 
 public class GameRunnerTests
 {
-    private static readonly string[] ValidColors = { "Red", "Blue", "Green", "Yellow", "Purple", "Orange" };
+    private static readonly IReadOnlyDictionary<char, string> ColorMap = new Dictionary<char, string>
+    {
+        ['R'] = "Red", ['B'] = "Blue", ['G'] = "Green", ['Y'] = "Yellow", ['P'] = "Purple", ['O'] = "Orange"
+    };
     private const int CodeLength = 4;
 
     [Fact]
@@ -24,8 +27,8 @@ public class GameRunnerTests
     {
         var secret = new[] { "Red", "Blue", "Green", "Yellow" };
         var game = new Game(secret, maxAttempts: 10);
-        var io = new FakeIO("Red Blue Green Yellow");
-        var runner = new GameRunner(io, game, ValidColors, CodeLength);
+        var io = new FakeIO("RBGY");
+        var runner = new GameRunner(io, game, ColorMap, CodeLength);
 
         runner.Run();
 
@@ -39,8 +42,8 @@ public class GameRunnerTests
     {
         var secret = new[] { "Red", "Red", "Red", "Red" };
         var game = new Game(secret, maxAttempts: 2);
-        var io = new FakeIO("Blue Blue Blue Blue", "Blue Blue Blue Blue");
-        var runner = new GameRunner(io, game, ValidColors, CodeLength);
+        var io = new FakeIO("BBBB", "BBBB");
+        var runner = new GameRunner(io, game, ColorMap, CodeLength);
 
         runner.Run();
 
@@ -55,8 +58,8 @@ public class GameRunnerTests
     {
         var secret = new[] { "Red", "Blue", "Green", "Yellow" };
         var game = new Game(secret, maxAttempts: 10);
-        var io = new FakeIO("NotAColor Blue Green Yellow", "Red Blue Green Yellow");
-        var runner = new GameRunner(io, game, ValidColors, CodeLength);
+        var io = new FakeIO("XBGY", "RBGY");
+        var runner = new GameRunner(io, game, ColorMap, CodeLength);
 
         runner.Run();
 
@@ -78,8 +81,8 @@ public class GameRunnerTests
         var secret = new[] { "Red", "Blue", "Green", "Yellow" };
         var game = new Game(secret, maxAttempts: 10);
         // Wrong guess first, then correct
-        var io = new FakeIO("Red Blue Yellow Green", "Red Blue Green Yellow");
-        var runner = new GameRunner(io, game, ValidColors, CodeLength);
+        var io = new FakeIO("RBYG", "RBGY");
+        var runner = new GameRunner(io, game, ColorMap, CodeLength);
 
         runner.Run();
 
@@ -97,8 +100,8 @@ public class GameRunnerTests
         var secret = new[] { "Red", "Blue", "Green", "Yellow" };
         var game = new Game(secret, maxAttempts: 10);
         // Wrong guess first, then correct
-        var io = new FakeIO("Red Blue Yellow Green", "Red Blue Green Yellow");
-        var runner = new GameRunner(io, game, ValidColors, CodeLength);
+        var io = new FakeIO("RBYG", "RBGY");
+        var runner = new GameRunner(io, game, ColorMap, CodeLength);
 
         runner.Run();
 
@@ -107,5 +110,21 @@ public class GameRunnerTests
             line.Contains("attempt", StringComparison.OrdinalIgnoreCase) ||
             line.Contains("remaining", StringComparison.OrdinalIgnoreCase) ||
             line.Contains("left", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Run_ShowsColorAbbreviationsInPrompt()
+    {
+        var secret = new[] { "Red", "Blue", "Green", "Yellow" };
+        var game = new Game(secret, maxAttempts: 10);
+        var io = new FakeIO("RBGY");
+        var runner = new GameRunner(io, game, ColorMap, CodeLength);
+
+        runner.Run();
+
+        // The prompt output should display abbreviation-to-color mappings (e.g. "R=Red" or "R" next to "Red")
+        Assert.Contains(io.Output, line =>
+            line.Contains("R", StringComparison.Ordinal) &&
+            line.Contains("Red", StringComparison.OrdinalIgnoreCase));
     }
 }

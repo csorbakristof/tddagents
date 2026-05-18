@@ -24,7 +24,7 @@ You coordinate the full **Red → Green → Blue** TDD workflow by delegating wo
 - ONLY delegate; track state and coordinate handoffs between agents
 
 ## Approach
-1. Receive the feature or task to be developed
+1. Receive the feature or task to be developed. Record all tasks you get into the `TDD_Cycle_Tracking.md` file.
 2. Break it down into TDD cycles if needed
 3. Delegate to **RedMaster** to write failing tests
 4. Once RedMaster reports completion, delegate to **GreenMaster**

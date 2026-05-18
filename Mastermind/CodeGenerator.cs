@@ -7,9 +7,8 @@ public class CodeGenerator
         if (availableColors == null || availableColors.Length == 0)
             throw new ArgumentException("availableColors must not be empty.", nameof(availableColors));
 
-        var result = new string[codeLength];
-        for (int i = 0; i < codeLength; i++)
-            result[i] = availableColors[Random.Shared.Next(availableColors.Length)];
-        return result;
+        return Enumerable.Range(0, codeLength)
+            .Select(_ => availableColors[Random.Shared.Next(availableColors.Length)])
+            .ToArray();
     }
 }

@@ -12,14 +12,23 @@ public class InputParser
 
         var lookup = validColors.ToDictionary(c => c, c => c, StringComparer.OrdinalIgnoreCase);
 
-        var pegs = new string[tokens.Length];
-        for (int i = 0; i < tokens.Length; i++)
-        {
-            if (!lookup.TryGetValue(tokens[i], out var canonical))
-                return new ParseResult.Failure($"'{tokens[i]}' is not a valid color.");
-            pegs[i] = canonical;
-        }
+        var firstInvalid = tokens.FirstOrDefault(t => !lookup.ContainsKey(t));
+        if (firstInvalid != null)
+            return new ParseResult.Failure($"'{firstInvalid}' is not a valid color.");
 
-        return new ParseResult.Success(pegs);
+        return new ParseResult.Success(tokens.Select(t => lookup[t]).ToArray());
+    }
+
+    public static ParseResult ParseCompact(string input, IReadOnlyDictionary<char, string> colorMap, int codeLength)
+    {
+        if (input.Length != codeLength)
+            return new ParseResult.Failure($"Expected {codeLength} letters, got {input.Length}.");
+
+        var upper = input.ToUpperInvariant();
+        var firstInvalid = upper.FirstOrDefault(c => !colorMap.ContainsKey(c));
+        if (firstInvalid != default)
+            return new ParseResult.Failure($"'{firstInvalid}' is not a valid color letter.");
+
+        return new ParseResult.Success(upper.Select(c => colorMap[c]).ToArray());
     }
 }

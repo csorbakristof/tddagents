@@ -6,41 +6,20 @@ public class FeedbackEvaluator
 {
     public static FeedbackResult Evaluate(string[] secret, string[] guess)
     {
-        int exactMatches = 0;
-        var unmatchedSecret = new List<string>();
-        var unmatchedGuess = new List<string>();
+        var pairs = secret.Zip(guess);
 
-        for (int i = 0; i < secret.Length; i++)
-        {
-            if (secret[i] == guess[i])
-            {
-                exactMatches++;
-            }
-            else
-            {
-                unmatchedSecret.Add(secret[i]);
-                unmatchedGuess.Add(guess[i]);
-            }
-        }
+        int exactMatches = pairs.Count(p => p.First == p.Second);
 
-        var secretFreq = CountFrequencies(unmatchedSecret);
-        var guessFreq = CountFrequencies(unmatchedGuess);
+        var unmatched = pairs.Where(p => p.First != p.Second).ToList();
+        var secretFreq = CountFrequencies(unmatched.Select(p => p.First));
+        var guessFreq = CountFrequencies(unmatched.Select(p => p.Second));
 
-        int colorMatches = 0;
-        foreach (var key in guessFreq.Keys)
-        {
-            if (secretFreq.TryGetValue(key, out int sCount))
-                colorMatches += Math.Min(sCount, guessFreq[key]);
-        }
+        int colorMatches = guessFreq.Sum(kv =>
+            secretFreq.TryGetValue(kv.Key, out int sCount) ? Math.Min(sCount, kv.Value) : 0);
 
         return new FeedbackResult(exactMatches, colorMatches);
     }
 
-    private static Dictionary<string, int> CountFrequencies(IEnumerable<string> items)
-    {
-        var freq = new Dictionary<string, int>();
-        foreach (var item in items)
-            freq[item] = freq.GetValueOrDefault(item) + 1;
-        return freq;
-    }
+    private static Dictionary<string, int> CountFrequencies(IEnumerable<string> items) =>
+        items.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
 }

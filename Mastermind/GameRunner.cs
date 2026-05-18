@@ -4,27 +4,32 @@ public class GameRunner
 {
     private readonly IGameIO _io;
     private readonly Game _game;
-    private readonly string[] _validColors;
+    private readonly IReadOnlyDictionary<char, string> _colorMap;
     private readonly int _codeLength;
 
-    public GameRunner(IGameIO io, Game game, string[] validColors, int codeLength)
+    public GameRunner(IGameIO io, Game game, IReadOnlyDictionary<char, string> colorMap, int codeLength)
     {
         _io = io;
         _game = game;
-        _validColors = validColors;
+        _colorMap = colorMap;
         _codeLength = codeLength;
+    }
+
+    private void PrintWelcome()
+    {
+        _io.WriteLine($"Welcome to Mastermind! Guess the {_codeLength}-color code.");
+        _io.WriteLine("Colors: " + string.Join("  ", _colorMap.Select(kv => $"{kv.Key}={kv.Value}")));
     }
 
     public void Run()
     {
-        _io.WriteLine($"Welcome to Mastermind! Guess the {_codeLength}-color code.");
-        _io.WriteLine($"Available colors: {string.Join(", ", _validColors)}");
+        PrintWelcome();
 
         while (true)
         {
             _io.WriteLine("Enter guess:");
             var line = _io.ReadLine() ?? string.Empty;
-            var result = InputParser.Parse(line, _validColors, _codeLength);
+            var result = InputParser.ParseCompact(line, _colorMap, _codeLength);
 
             if (result is ParseResult.Failure failure)
             {
