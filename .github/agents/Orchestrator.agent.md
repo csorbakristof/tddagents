@@ -1,7 +1,7 @@
 ---
 name: "Orchestrator"
 description: "Use when coordinating the full TDD cycle, managing the red-green-blue workflow, directing software development across agents, top-level task planning, delegating to RedMaster, GreenMaster, or BlueMaster."
-tools: [read, search, todo, agent]
+tools: [read, edit, search, todo, agent]
 agents: ["RedMaster", "GreenMaster", "BlueMaster"]
 ---
 
