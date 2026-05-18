@@ -1,4 +1,5 @@
 using Mastermind;
+using Xunit;
 
 namespace Mastermind.Tests;
 
